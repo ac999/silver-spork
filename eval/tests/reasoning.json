@@ -1,0 +1,72 @@
+{
+  "suite": "reasoning",
+  "kpi": "Multi-step reasoning (unambiguous answers)",
+  "applies_to": ["reasoning"],
+  "threshold": ">= 8/10",
+  "prompt_suffix": "\n\nWork through the problem step by step, then finish your reply with one final line of the form `ANSWER: <value>` and write nothing after that line.",
+  "cases": [
+    {
+      "id": "rsn_arith_chain",
+      "prompt": "Start with 17. Multiply by 6. Subtract 14. Divide by 4. Add 29. Multiply by 3. What is the result?",
+      "check": { "type": "regex", "pattern": "ANSWER\\W{0,6}153(?!\\d)(?![.,]\\d)" },
+      "rubric": "Expected 153."
+    },
+    {
+      "id": "rsn_percent_chain",
+      "prompt": "A jacket is listed at 240 lei. The shop applies a 25% discount, then adds 19% VAT on the discounted price, then adds a flat 10 lei delivery fee. What is the final amount to pay, in lei?",
+      "check": { "type": "regex", "pattern": "ANSWER\\W{0,6}224[.,]20?(?!\\d)" },
+      "rubric": "Expected 224.2 lei (240 * 0.75 = 180; * 1.19 = 214.2; + 10 = 224.2)."
+    },
+    {
+      "id": "rsn_logic_grid",
+      "prompt": "Three friends (Ana, Bogdan, Cristina) each own a different pet (dog, cat, parrot) and live in a different city (Cluj, Iași, Timișoara). Clues: (1) Ana does not live in Cluj and does not own the dog. (2) The parrot owner lives in Iași. (3) Bogdan lives in Timișoara. (4) Cristina owns the cat. Who owns the dog, and in which city does that person live? Give both in the answer line as `<name>, <city>`.",
+      "check": [
+        { "type": "regex", "pattern": "ANSWER.{0,60}Bogdan" },
+        { "type": "regex", "pattern": "ANSWER.{0,60}Timi" }
+      ],
+      "rubric": "Expected Bogdan, Timișoara. (Cristina = cat; Bogdan = Timișoara; Ana cannot be in Cluj so Ana is in Iași and owns the parrot; Bogdan owns the dog; Cristina lives in Cluj.)"
+    },
+    {
+      "id": "rsn_schedule",
+      "prompt": "Four one-hour meetings A, B, C and D must each take one of the slots 9:00, 10:00, 11:00 and 12:00 (one meeting per slot). Constraints: A must be earlier than C. D cannot be at 9:00 or 12:00. B must be in the slot immediately after D. C is not at 12:00. Which meeting is at 12:00? Answer with the single letter.",
+      "check": { "type": "regex", "pattern": "ANSWER\\W{0,6}(meeting\\s*)?B\\b" },
+      "rubric": "Expected B. (D at 11, B at 12, A at 9, C at 10 is the only valid schedule.)"
+    },
+    {
+      "id": "rsn_units",
+      "prompt": "A pipe delivers 2.5 litres of water per second. How many cubic metres of water does it deliver in 3 hours and 20 minutes? Answer in cubic metres.",
+      "check": { "type": "regex", "pattern": "ANSWER\\W{0,6}30(?:\\.0+)?(?!\\d)(?![.,]\\d)" },
+      "rubric": "Expected 30 cubic metres (12,000 s * 2.5 L/s = 30,000 L = 30 m^3)."
+    },
+    {
+      "id": "rsn_weekday",
+      "prompt": "Given that 1 January 2027 is a Friday, what day of the week is 15 March 2027? (2027 is not a leap year.)",
+      "check": { "type": "regex", "pattern": "ANSWER\\W{0,6}Monday" },
+      "rubric": "Expected Monday (15 March is day 74 of the year; 73 days after Friday; 73 mod 7 = 3; Friday + 3 = Monday)."
+    },
+    {
+      "id": "rsn_workdays",
+      "prompt": "A project starts on Monday 2 February 2026 and takes exactly 45 working days (Monday to Friday, no holidays), with 2 February counting as working day 1. On what calendar date is working day 45? Give the full date.",
+      "check": { "type": "regex", "pattern": "ANSWER.{0,20}(3(?:rd)?\\s*(?:of\\s*)?April,?\\s*2026|April\\s*3(?:rd)?,?\\s*2026|2026-04-03|0?3[./-]04[./-]2026)" },
+      "rubric": "Expected Friday 3 April 2026 (45 working days = 9 full weeks; the 9th week starts Monday 30 March 2026)."
+    },
+    {
+      "id": "rsn_ages",
+      "prompt": "Maria is three times as old as her son. In 12 years she will be exactly twice as old as he will be. How old is the son now?",
+      "check": { "type": "regex", "pattern": "ANSWER\\W{0,6}12(?!\\d)(?![.,]\\d)" },
+      "rubric": "Expected 12 (3s + 12 = 2(s + 12) => s = 12)."
+    },
+    {
+      "id": "rsn_remainder",
+      "prompt": "What is the remainder when 7 to the power of 100 is divided by 5?",
+      "check": { "type": "regex", "pattern": "ANSWER\\W{0,6}1(?!\\d)(?![.,]\\d)" },
+      "rubric": "Expected 1 (7 = 2 mod 5; 2^4 = 1 mod 5; 100 is a multiple of 4)."
+    },
+    {
+      "id": "rsn_trains",
+      "prompt": "A train leaves Bucharest at 08:15 travelling towards Constanța at a constant 120 km/h. Another train leaves Constanța at 08:45 travelling towards Bucharest at a constant 105 km/h. The two cities are 225 km apart by rail. At what time (HH:MM) do the trains meet?",
+      "check": { "type": "regex", "pattern": "ANSWER\\W{0,6}0?9:29" },
+      "rubric": "Expected 09:29 (at 08:45 the first train has covered 60 km; 165 km remain at a closing speed of 225 km/h = 44 minutes)."
+    }
+  ]
+}

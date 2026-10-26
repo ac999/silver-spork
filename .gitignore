@@ -1,0 +1,17 @@
+eval/results/*.jsonl
+eval/results/*.json
+node_modules/
+.promptfoo/
+__pycache__/
+*.pyc
+
+# Machine-specific instances (create them from the .example templates)
+config/local-ai.json
+llamacpp/model.ini
+eval/models.json
+eval/tiers/
+# Results describe one machine; keep them local unless you want to publish them
+results/*
+!results/.gitkeep
+eval/results/*
+!eval/results/.gitkeep

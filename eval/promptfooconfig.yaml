@@ -1,0 +1,56 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+# KPI evaluation of ONE llama-server preset (tier) per run. See README.md.
+#
+#   npm run eval:setup                                   # models.json from the template (first time) + eval/tiers/<Tier>.env
+#   npm run eval -- --env-file eval/tiers/<Tier>.env     # = promptfoo eval -c eval/promptfooconfig.yaml --no-cache --env-file ...
+#   npm run eval:view
+#
+# The tier comes from the PF_TIER environment variable (tiers/<Tier>.env sets it; the files are
+# generated from models.json). The test list, per-tier sampling and chat_template_kwargs come from
+# gen_tests.py / lib/pf_prompt.py, which read tests/*.json and models.json. Nothing model- or
+# machine-specific lives in this file.
+#
+# Python: promptfoo spawns PROMPTFOO_PYTHON when set (the generated tier env file sets it from
+# config/local-ai.json `python_cmd`; your own environment variable wins), otherwise it auto-detects
+# a Python 3 (`python3` / `python`; Windows Store stubs are skipped).
+description: "KPI eval - {{ env.PF_TIER }}"
+
+env:
+  # Long prompts (24k-token haystacks) and long reasoning answers need more than the 5-minute default.
+  REQUEST_TIMEOUT_MS: "{{ env.REQUEST_TIMEOUT_MS | default('600000') }}"
+
+prompts:
+  # Returns the chat messages for the test plus the request config (sampling, chat_template_kwargs,
+  # max_tokens, tools) read from models.json.
+  - file://lib/pf_prompt.py:build_prompt
+
+providers:
+  - id: "openai:chat:{{ env.PF_TIER }}"
+    label: "{{ env.PF_TIER }}"
+    config:
+      # Server URL: the Python side reads config/local-ai.json `server_url`; promptfoo cannot, so set
+      # LLAMA_SERVER_URL in the environment (or a tier env file) when the server is not on localhost:8080.
+      apiBaseUrl: "{{ env.LLAMA_SERVER_URL | default('http://127.0.0.1:8080') }}/v1"
+      apiKeyRequired: false
+      useDefaultApiKey: false
+      omitDefaults: true      # send only what pf_prompt.py sets; no OpenAI defaults (temperature 0, max_tokens 1024)
+      showThinking: false     # checks grade `content` only; reasoning stays out of the output
+
+tests:
+  path: file://gen_tests.py:generate_tests
+  config:
+    tier: "{{ env.PF_TIER }}"
+    # Empty = rubric cases are recorded as needs-judge for a human/AI reviewer (no llm-rubric
+    # assertion). A tier name grades with that local preset, "default" defers to --grader, anything
+    # else is a promptfoo provider id (e.g. anthropic:messages:<model>). See README.md.
+    grader: "{{ env.GRADER | default('') }}"
+
+extensions:
+  # afterAll: writes results/<Tier>_records.jsonl + results/<Tier>_scorecard.md (KPI table, needs-judge details)
+  - file://lib/pf_hooks.py:extension_hook
+
+evaluateOptions:
+  maxConcurrency: 1   # a single-slot router serves one request at a time; keeps timings honest
+
+# promptfoo resolves this against the current directory: run from the repo root (npm scripts do).
+outputPath: eval/results/{{ env.PF_TIER }}.json

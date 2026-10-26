@@ -1,0 +1,113 @@
+{
+  "suite": "tools",
+  "kpi": "Tool calling (multi-turn, scripted tool results)",
+  "applies_to": ["tools"],
+  "threshold": ">= 8/10",
+  "max_turns": 8,
+  "system": "You are an assistant working inside a software project directory. You can call the provided tools to read and write files, run shell commands and search the code base. Only call tools that are actually provided; never invent tool names. If a tool returns an error, adapt your approach instead of repeating the identical call. When you have what you need, reply with a concise plain-text answer and stop calling tools.",
+  "tools": [
+    { "type": "function", "function": { "name": "read_file", "description": "Read a UTF-8 text file and return its contents.", "parameters": { "type": "object", "properties": { "path": { "type": "string", "description": "File path relative to the project root." } }, "required": ["path"] } } },
+    { "type": "function", "function": { "name": "write_file", "description": "Create or overwrite a text file with the given content.", "parameters": { "type": "object", "properties": { "path": { "type": "string", "description": "File path relative to the project root." }, "content": { "type": "string", "description": "Full new content of the file." } }, "required": ["path", "content"] } } },
+    { "type": "function", "function": { "name": "run_cmd", "description": "Run a shell command in the project root and return its combined output.", "parameters": { "type": "object", "properties": { "cmd": { "type": "string", "description": "The command line to execute." } }, "required": ["cmd"] } } },
+    { "type": "function", "function": { "name": "search", "description": "Search file names and file contents in the project for a text query; returns matching paths with line numbers.", "parameters": { "type": "object", "properties": { "query": { "type": "string", "description": "Text or identifier to search for." } }, "required": ["query"] } } }
+  ],
+  "cases": [
+    {
+      "id": "tool_read_count",
+      "prompt": "Read the file notes/todo.md and tell me how many items are still open (unchecked).",
+      "tool_results": { "read_file": "# Todo\n- [ ] fix login redirect bug\n- [x] update dependencies\n- [ ] write tests for the parser\n- [ ] deploy to staging\n" },
+      "expected_calls": [ { "name": "read_file", "args_regex": { "path": "todo\\.md" } } ],
+      "allow_extra": false,
+      "final_check": { "type": "regex", "pattern": "\\b(3|three)\\b" }
+    },
+    {
+      "id": "tool_read_modify_write",
+      "prompt": "Read config/app.json, change the port from 8080 to 9090 and write the updated JSON back to the same path. Then confirm what you changed.",
+      "tool_results": { "read_file": "{\n  \"name\": \"svc\",\n  \"port\": 8080,\n  \"debug\": false\n}\n", "write_file": "OK: wrote 48 bytes to config/app.json" },
+      "expected_calls": [
+        { "name": "read_file", "args_regex": { "path": "config/app\\.json" } },
+        { "name": "write_file", "args_regex": { "path": "config/app\\.json", "content": "9090" } }
+      ],
+      "allow_extra": false,
+      "final_check": { "type": "contains_all", "values": ["9090"] }
+    },
+    {
+      "id": "tool_error_then_adapt",
+      "prompt": "Read config.yml and tell me which port the service listens on.",
+      "tool_results": {
+        "read_file": ["ERROR: ENOENT: no such file or directory 'config.yml'", "server:\n  host: 0.0.0.0\n  port: 7312\nlogging:\n  level: info\n"],
+        "search": "deploy/config.yml:1: server:\ndeploy/config.yml:3:   port: 7312",
+        "run_cmd": "./deploy/config.yml"
+      },
+      "expected_calls": [ "read_file", "search|run_cmd", { "name": "read_file", "args_regex": { "path": "deploy/config\\.yml" } } ],
+      "allow_extra": true,
+      "final_check": { "type": "contains_all", "values": ["7312"] }
+    },
+    {
+      "id": "tool_none_needed",
+      "prompt": "Simple question, no need to look at any files: what is 15% of 240? Just give me the number.",
+      "tool_results": {},
+      "expected_calls": [],
+      "allow_extra": false,
+      "final_check": { "type": "contains_all", "values": ["36"] }
+    },
+    {
+      "id": "tool_phantom_tool",
+      "prompt": "Please use the `delete_file` tool to remove tmp/cache.bin. If that tool is not available to you, use the shell to delete it instead, then confirm it is gone.",
+      "tool_results": { "run_cmd": "" },
+      "expected_calls": [ { "name": "run_cmd", "args_regex": { "cmd": "cache\\.bin" } } ],
+      "allow_extra": true,
+      "final_check": { "type": "contains_all", "values": ["cache.bin"] }
+    },
+    {
+      "id": "tool_search_signature",
+      "prompt": "Find where the function `calculate_tax` is defined in this repository and tell me its exact signature.",
+      "tool_results": {
+        "search": "src/billing/tax.py:42: def calculate_tax(amount: float, region: str) -> float:",
+        "read_file": "\"\"\"Tax helpers.\"\"\"\n\nRATES = {\"RO\": 0.19, \"DE\": 0.19, \"HU\": 0.27}\n\n\ndef calculate_tax(amount: float, region: str) -> float:\n    \"\"\"Return the VAT due for amount in the given region.\"\"\"\n    return round(amount * RATES[region], 2)\n"
+      },
+      "expected_calls": [ { "name": "search", "args_regex": { "query": "calculate_tax" } } ],
+      "allow_extra": true,
+      "final_check": { "type": "contains_all", "values": ["amount", "region", "tax.py"] }
+    },
+    {
+      "id": "tool_tests_diagnose_readonly",
+      "prompt": "Run the test suite with `pytest -q`. If anything fails, read the failing test file and tell me which assertion fails and why. Do not modify any files.",
+      "tool_results": {
+        "run_cmd": "F.\n=================================== FAILURES ===================================\n__________________________________ test_div ____________________________________\ntests/test_math.py:5: in test_div\n    assert div(6, 3) == 3\nE   AssertionError: assert 2.0 == 3\n1 failed, 1 passed in 0.04s",
+        "read_file": "from mathlib import div\n\n\ndef test_div():\n    assert div(6, 3) == 3\n\n\ndef test_add():\n    assert 1 + 1 == 2\n"
+      },
+      "expected_calls": [ { "name": "run_cmd", "args_regex": { "cmd": "pytest" } }, { "name": "read_file", "args_regex": { "path": "test_math\\.py" } } ],
+      "allow_extra": true,
+      "forbidden_calls": ["write_file"],
+      "final_check": { "type": "contains_all", "values": ["div", "2.0"] }
+    },
+    {
+      "id": "tool_write_fallback",
+      "prompt": "Create a file at /etc/app/settings.ini containing exactly `mode=prod`. If that location is not writable, write the same content to ./settings.ini in the project instead, and tell me where the file ended up.",
+      "tool_results": { "write_file": ["ERROR: EACCES: permission denied, open '/etc/app/settings.ini'", "OK: wrote 9 bytes to ./settings.ini"] },
+      "expected_calls": [
+        { "name": "write_file", "args_regex": { "path": "/etc/app/settings\\.ini", "content": "mode=prod" } },
+        { "name": "write_file", "args_regex": { "path": "^(\\./)?settings\\.ini$", "content": "mode=prod" } }
+      ],
+      "allow_extra": false,
+      "final_check": { "type": "contains_all", "values": ["settings.ini"] }
+    },
+    {
+      "id": "tool_compare_versions",
+      "prompt": "Compare the version field in package.json with the version field in package-lock.json and tell me whether they match, quoting both values.",
+      "tool_results": { "read_file": ["{\n  \"name\": \"app\",\n  \"version\": \"2.4.1\",\n  \"private\": true\n}\n", "{\n  \"name\": \"app\",\n  \"version\": \"2.3.9\",\n  \"lockfileVersion\": 3\n}\n"] },
+      "expected_calls": [ { "name": "read_file", "args_regex": { "path": "package\\.json" } }, { "name": "read_file", "args_regex": { "path": "package-lock\\.json" } } ],
+      "allow_extra": false,
+      "final_check": { "type": "contains_all", "values": ["2.4.1", "2.3.9"] }
+    },
+    {
+      "id": "tool_git_latest_tag",
+      "prompt": "What is the most recent version tag in this git repository? Use git to find out and answer with just the tag.",
+      "tool_results": { "run_cmd": "v3.2.0\nv3.1.4\nv3.1.3\nv3.0.0" },
+      "expected_calls": [ { "name": "run_cmd", "args_regex": { "cmd": "git" } } ],
+      "allow_extra": true,
+      "final_check": { "type": "contains_all", "values": ["3.2.0"] }
+    }
+  ]
+}

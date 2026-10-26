@@ -1,0 +1,16 @@
+{
+  "_readme": [
+    "Worked example for a consumer GPU with 8 GB of VRAM. Copy to config/local-ai.json and replace the placeholder paths."
+  ],
+  "llamacpp_dir": "/path/to/llama.cpp",
+  "hf_home": "/path/to/huggingface",
+  "hf_cache": "/path/to/huggingface/hub",
+  "server_url": "http://127.0.0.1:8080",
+  "server_port": 8080,
+  "models_max": 1,
+  "threads": 12,
+  "_threads": "physical cores of the example machine; use yours (scripts/detect-hardware.ps1)",
+  "python_cmd": "py",
+  "_python_cmd": "Windows py launcher; python3 on Linux/macOS",
+  "results_dir": "results"
+}

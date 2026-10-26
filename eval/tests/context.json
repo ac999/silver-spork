@@ -1,0 +1,80 @@
+{
+  "suite": "context",
+  "kpi": "Long-context recall (needle in a haystack at 8k/16k/24k tokens, facts at 20/50/80% depth)",
+  "applies_to": ["all"],
+  "threshold": ">= 8/9",
+  "cases": [
+    {
+      "id": "ctx_8k",
+      "max_tokens": 256,
+      "haystack": {
+        "tokens": 8000,
+        "facts": [
+          {
+            "fact": "Reminder for the facilities team: the maintenance password for the Oradea backup generator is TANGERINE-4471 and must not be shared outside the team.",
+            "question": "What is the maintenance password for the Oradea backup generator?",
+            "answer": "TANGERINE-4471"
+          },
+          {
+            "fact": "Staff note: Dr. Ilinca Vraciu keeps exactly 23 ceramic owls on her office windowsill and asks that cleaners do not move them.",
+            "question": "How many ceramic owls does Dr. Ilinca Vraciu keep on her office windowsill?",
+            "answer": "23"
+          },
+          {
+            "fact": "Travel notice: the ferry from Sulina to Periprava departs at 06:40 on Thursdays only; there is no service on other days.",
+            "question": "On which day of the week and at what time does the ferry from Sulina to Periprava depart?",
+            "answer": ["Thursday", "6:40"]
+          }
+        ]
+      }
+    },
+    {
+      "id": "ctx_16k",
+      "max_tokens": 256,
+      "haystack": {
+        "tokens": 16000,
+        "facts": [
+          {
+            "fact": "Finance memo: Project Heron's internal budget code is HX-2290-B; use it on every invoice related to the project.",
+            "question": "What is Project Heron's internal budget code?",
+            "answer": "HX-2290-B"
+          },
+          {
+            "fact": "Port trivia: the tallest crane at the Constanța south terminal is nicknamed 'Bătrânul Albastru' by the dock workers.",
+            "question": "What is the nickname of the tallest crane at the Constanța south terminal?",
+            "answer": "Albastru"
+          },
+          {
+            "fact": "Membership record: Marius Teodorescu's library card expires on 14 March 2031 and can be renewed at any branch.",
+            "question": "When does Marius Teodorescu's library card expire?",
+            "answer": ["14", "March", "2031"]
+          }
+        ]
+      }
+    },
+    {
+      "id": "ctx_24k",
+      "max_tokens": 256,
+      "haystack": {
+        "tokens": 24000,
+        "facts": [
+          {
+            "fact": "Inventory entry: the serial number of the lighthouse lens at Cape Midia is LM-77-ORCHID, recorded during the 2022 inspection.",
+            "question": "What is the serial number of the lighthouse lens at Cape Midia?",
+            "answer": "LM-77-ORCHID"
+          },
+          {
+            "fact": "Forestry report: exactly 412 apple trees were planted in the Voineasa orchard in 2019, replacing the frost-damaged stock.",
+            "question": "How many apple trees were planted in the Voineasa orchard in 2019?",
+            "answer": "412"
+          },
+          {
+            "fact": "IT notice: the Wi-Fi network in the Sibiu reading room is called 'quietfox'; the password is posted at the front desk.",
+            "question": "What is the name of the Wi-Fi network in the Sibiu reading room?",
+            "answer": "quietfox"
+          }
+        ]
+      }
+    }
+  ]
+}

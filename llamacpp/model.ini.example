@@ -1,0 +1,59 @@
+; llama-server router presets - copy to llamacpp/model.ini (gitignored) and define YOUR tiers.
+;
+; How it works
+;   * Each [Section] is a preset. Clients select it by sending the section name in the "model" field,
+;     so section names are your tier names: pick role-based names (Reasoning, Agent, Fast, Writer, ...).
+;   * Keys are llama-server command-line flags without the leading dashes (ctx-size, n-gpu-layers, temp ...).
+;     `llama-server --help` lists them all. [*] holds defaults shared by every preset; a preset overrides them.
+;   * Precedence: command line > preset section > [*].
+;   * `hf = <org>/<repo>-GGUF:<QUANT>` downloads into the HF cache on first use; `model = /path/file.gguf` uses a local file.
+;
+; How to size a model for your GPU (rule of thumb, verify with scripts/benchmark.ps1)
+;   VRAM needed ~= GGUF file size + KV cache + ~1 GB compute/overhead.
+;   KV cache at q8_0 for a 32k context is roughly 1-3 GB for 7-9B dense models, much less for hybrid-attention
+;   models (linear/gated attention layers), much more for older architectures; f16 KV doubles it. Keep weights at Q4_K_M or better
+;   for tool use; never go below q8_0 for the KV cache (KV quantization hurts more than weight quantization).
+;   Dense model that does not fit: it will be slow (CPU offload of layers). Prefer a smaller model or quant.
+;   Mixture-of-experts model (name contains A<n>B, e.g. 35B-A3B): keep attention on the GPU and the experts in RAM with
+;   `n-cpu-moe = N` (N of the model's layers). Sweep N with `scripts/benchmark.ps1 -Filter <name> -MoeSweep "..."`
+;   and keep the lowest N that does not run out of VRAM at your context size. Needs file size + ~4 GB of free RAM.
+;
+; Thinking / reasoning models
+;   `reasoning = on|off` toggles the chat template's thinking mode where supported. Keep it OFF for presets used by
+;   coding agents (tool calls otherwise end up in reasoning_content and agents loop); ON for a planning tier.
+;   `reasoning-format = deepseek` keeps thoughts in message.reasoning_content instead of content.
+;   Sampling defaults (temp, top-p, top-k, min-p, presence-penalty) come from the MODEL CARD; copy them per preset.
+
+[*]
+ctx-size = 32768
+n-gpu-layers = 99
+flash-attn = on
+cache-type-k = q8_0
+cache-type-v = q8_0
+jinja = true
+reasoning-format = deepseek
+threads = 8
+
+[ExampleReasoning]
+; A mixture-of-experts model with experts offloaded to RAM; thinking on. Replace repo/quant with your pick.
+hf = <org>/<moe-model>-GGUF:<QUANT>
+n-cpu-moe = <N from the sweep>
+reasoning = on
+temp = 0.6
+top-p = 0.95
+top-k = 20
+
+[ExampleAgent]
+; A dense model that fits fully in VRAM; thinking off for coding agents.
+hf = <org>/<dense-model>-GGUF:<QUANT>
+reasoning = off
+temp = 0.6
+top-p = 0.95
+top-k = 20
+
+[ExampleFast]
+; Small, fast everyday model.
+hf = <org>/<small-model>-GGUF:<QUANT>
+reasoning = off
+temp = 1.0
+top-p = 0.95

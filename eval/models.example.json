@@ -1,0 +1,90 @@
+{
+  "_readme": [
+    "TEMPLATE for eval/models.json, the LOCAL (gitignored) file that describes YOUR tiers.",
+    "Copy it: `npm run eval:setup` does so when models.json is missing, or copy it by hand.",
+    "Then: rename every <Placeholder> tier to the exact preset name your llama-server router",
+    "exposes (`llama-server --models-preset` / model.ini section names; also what `/v1/models` lists),",
+    "fill in the fields below, delete tiers you do not have, and run `npm run eval:setup` again",
+    "to generate eval/tiers/<Tier>.env. Keys starting with an underscore are comments; delete or keep them.",
+    "The loader rejects placeholder names (angle brackets) and unknown roles with a message that points here."
+  ],
+
+  "languages": [],
+  "_languages": [
+    "Natural languages, other than English, that your tiers should be tested in: lower-case codes, e.g. [\"ro\"].",
+    "Cases in tests/*.json that carry \"lang\": \"<code>\" run only when that code is listed here; English cases",
+    "always run. Leave [] to run English only. See README.md 'Adding a language' to add cases for another language."
+  ],
+
+  "timeout_s": 600,
+  "_timeout_s": "Per-request timeout in seconds for run_eval.py (promptfoo uses REQUEST_TIMEOUT_MS, default 600000). Long-context cases (24k-token prompts) and reasoning models need several minutes on consumer hardware.",
+
+  "default_max_tokens": 4096,
+  "_default_max_tokens": "Answer budget for cases that set no max_tokens. Precedence: case max_tokens > tier max_tokens > this value.",
+
+  "default_thinking_allowance": 6144,
+  "_default_thinking_allowance": "Extra tokens added to EVERY case's max_tokens for tiers whose chat_template_kwargs.enable_thinking is true (see thinking_allowance below). Only used when a tier does not set its own.",
+
+  "models": {
+    "_comment": "One entry per tier. The KEY is the tier name = the llama-server preset name; it also becomes eval/tiers/<Tier>.env, so use letters, digits, '.', '_' or '-' only.",
+
+    "<ReasoningTier>": {
+      "_what": "A model you run with thinking/reasoning enabled (e.g. a 'thinking' chat model). Example roles: everything but security.",
+      "roles": ["reasoning", "coding", "tools", "creative"],
+      "_roles": [
+        "Which suites this tier is measured on. Fixed vocabulary (anything else is rejected):",
+        "  reasoning -> tests/reasoning.json (multi-step word problems, exact final answer)",
+        "  coding    -> tests/coding.json (write/fix code; hidden unit tests run locally)",
+        "  tools     -> tests/tools.json (multi-turn function calling with scripted tool results)",
+        "  everyday  -> tests/quick.json (summaries, rewrites, extraction, translation)",
+        "  creative  -> tests/muse.json (creative writing, no refusals, rubric graded)",
+        "  security  -> tests/sentinel.json (defensive security knowledge, no fabricated CVEs)",
+        "Suites with applies_to [\"all\"] (integrity, context, instruction) run for every tier regardless of roles."
+      ],
+      "notes": "Free text for yourself: which GGUF/quant this preset loads, when you last changed it. Never read by the code.",
+      "sampling": { "temperature": 0.6, "top_p": 0.95, "top_k": 20 },
+      "_sampling": [
+        "Sent verbatim in every request (temperature, top_p, top_k, min_p, repeat_penalty, ...).",
+        "Take the values from the model card's 'recommended sampling' / 'generation config' section on Hugging Face",
+        "(or generation_config.json in the original repo); thinking and non-thinking modes often have different values.",
+        "Do not tune them against the suites: the eval measures the preset as you actually run it."
+      ],
+      "chat_template_kwargs": { "enable_thinking": true },
+      "_chat_template_kwargs": [
+        "Passed as the top-level `chat_template_kwargs` request field, which llama-server feeds to the Jinja chat",
+        "template. Use it for the model's thinking toggle (the model card names the variable: enable_thinking for",
+        "Qwen-style templates, others differ) or any other template switch. {} sends nothing. A value here also",
+        "overrides the preset's own `reasoning` setting for the eval, without touching the server config."
+      ],
+      "thinking_allowance": 6144,
+      "_thinking_allowance": [
+        "Only matters when chat_template_kwargs.enable_thinking is true. On llama-server the chain of thought counts",
+        "toward max_tokens, so a case that asks for one word with max_tokens 32 would spend its whole budget thinking",
+        "and return an EMPTY answer (finish_reason=length). The harness adds this many tokens to every case's budget",
+        "for such tiers. Size it to the model's typical reasoning length (4096-8192 is common); too small truncates",
+        "answers, too large only costs time on runaway reasoning. Omit to use default_thinking_allowance."
+      ],
+      "max_tokens": 8192,
+      "_max_tokens": "Optional per-tier answer budget for cases without their own max_tokens (overrides default_max_tokens). Raise it for models that write long answers or when your context window allows; the thinking_allowance is added on top."
+    },
+
+    "<AgentTier>": {
+      "_what": "A fast instruct model you use for coding/agent work and everyday tasks, thinking off.",
+      "roles": ["coding", "tools", "everyday", "creative"],
+      "notes": "",
+      "sampling": { "temperature": 0.7, "top_p": 0.8, "top_k": 20 },
+      "chat_template_kwargs": {},
+      "_chat_template_kwargs": "Empty: nothing is sent, the preset's own template defaults apply. Set {\"enable_thinking\": true} to measure the same preset with thinking (then also set thinking_allowance)."
+    },
+
+    "<SpecialistTier>": {
+      "_what": "A small model with one job (here: security); a model with roles [\"everyday\"] or [\"creative\"] works the same way.",
+      "roles": ["security"],
+      "notes": "",
+      "sampling": { "temperature": 0.3 },
+      "chat_template_kwargs": {}
+    }
+  },
+
+  "_base_url": "Optional: add \"base_url\": \"http://host:port\" at the top level to override the server URL. By default the eval reads config/local-ai.json `server_url` and falls back to http://127.0.0.1:8080."
+}

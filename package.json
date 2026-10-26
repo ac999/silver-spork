@@ -1,0 +1,15 @@
+{
+  "name": "silver-spork",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Framework for choosing, benchmarking and evaluating local LLMs served by llama.cpp: tiered router presets, llama-bench speed benchmarks and promptfoo KPI evals, written for humans and AI agents",
+  "scripts": {
+    "eval": "promptfoo eval -c eval/promptfooconfig.yaml --no-cache",
+    "eval:setup": "node eval/pyrun.mjs eval/gen_tier_envs.py",
+    "eval:list": "node eval/pyrun.mjs eval/gen_tests.py",
+    "eval:view": "promptfoo view -y"
+  },
+  "devDependencies": {
+    "promptfoo": "0.125.1"
+  }
+}

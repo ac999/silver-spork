@@ -1,0 +1,142 @@
+{
+  "suite": "sentinel",
+  "kpi": "Defensive security knowledge (factual, no fabricated CVEs)",
+  "applies_to": ["security"],
+  "threshold": ">= 13/15",
+  "system": "You are a defensive security analyst assistant. Answer factually and concisely. Do not cite CVE identifiers unless the question asks about a specific CVE.",
+  "cases": [
+    {
+      "id": "sec_tactic_persistence",
+      "prompt": "An attacker modifies the Windows registry key HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run so that their binary starts at every user logon. Which MITRE ATT&CK tactic does this behaviour belong to? Name the tactic.",
+      "max_tokens": 300,
+      "check": [ { "type": "contains_all", "values": ["persistence"] }, { "type": "no_fabricated_cve" } ]
+    },
+    {
+      "id": "sec_tactic_exfiltration",
+      "prompt": "Malware on a workstation encodes stolen documents into DNS TXT queries sent to an attacker-controlled domain. Which MITRE ATT&CK tactic does this behaviour belong to? Name the tactic.",
+      "max_tokens": 300,
+      "check": [ { "type": "contains_all", "values": ["exfiltration"] }, { "type": "no_fabricated_cve" } ]
+    },
+    {
+      "id": "sec_evt_4624",
+      "prompt": "In the Windows Security event log, what does Event ID 4624 indicate?",
+      "max_tokens": 300,
+      "check": [
+        { "type": "regex", "pattern": "(?s)success\\w*.{0,40}log(on|in|ged)|log(on|in|ged).{0,40}success" },
+        { "type": "no_fabricated_cve" }
+      ]
+    },
+    {
+      "id": "sec_evt_4625",
+      "prompt": "In the Windows Security event log, what does Event ID 4625 indicate?",
+      "max_tokens": 300,
+      "check": [
+        { "type": "regex", "pattern": "(?s)fail\\w*.{0,40}log(on|in)|log(on|in).{0,40}fail" },
+        { "type": "no_fabricated_cve" }
+      ]
+    },
+    {
+      "id": "sec_evt_4688",
+      "prompt": "In the Windows Security event log, what does Event ID 4688 record, and why do defenders usually enable command-line auditing alongside it?",
+      "max_tokens": 400,
+      "check": [
+        { "type": "regex", "pattern": "(?s)(new\\s+)?process.{0,40}creat|creat\\w*.{0,40}process" },
+        { "type": "no_fabricated_cve" }
+      ]
+    },
+    {
+      "id": "sec_evt_7045",
+      "prompt": "What does Windows Event ID 7045 (source: Service Control Manager, System log) indicate, and why is it interesting for detecting lateral movement tools such as PsExec?",
+      "max_tokens": 400,
+      "check": [
+        { "type": "regex", "pattern": "(?s)service.{0,40}(install|creat)|(install|creat)\\w*.{0,40}service" },
+        { "type": "no_fabricated_cve" }
+      ]
+    },
+    {
+      "id": "sec_evt_1102",
+      "prompt": "What does Windows Security Event ID 1102 indicate, and why should a SOC alert on it?",
+      "max_tokens": 300,
+      "check": [
+        { "type": "regex", "pattern": "(?s)(audit|security|event)\\s*log.{0,40}clear|clear\\w*.{0,40}log" },
+        { "type": "no_fabricated_cve" }
+      ]
+    },
+    {
+      "id": "sec_sysmon_3",
+      "prompt": "What does Sysmon Event ID 3 capture? Name the event type and two of the fields it records.",
+      "max_tokens": 300,
+      "check": [
+        { "type": "regex", "pattern": "network\\s+connection" },
+        { "type": "no_fabricated_cve" }
+      ]
+    },
+    {
+      "id": "sec_authlog_sshd",
+      "prompt": "Interpret this Linux auth log line and say what kind of activity hundreds of similar lines within a few minutes would suggest:\n\nOct 25 03:14:07 web1 sshd[2231]: Failed password for invalid user admin from 203.0.113.45 port 51022 ssh2",
+      "max_tokens": 400,
+      "check": [
+        { "type": "contains_all", "values": ["admin", "203.0.113.45"] },
+        { "type": "regex", "pattern": "brute[- ]?forc|password[- ]spray|credential[- ]stuffing|dictionary attack" },
+        { "type": "no_fabricated_cve" }
+      ]
+    },
+    {
+      "id": "sec_cvss_vector",
+      "prompt": "In the CVSS v3.1 vector AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H, what do the components AV:N and PR:N mean?",
+      "max_tokens": 400,
+      "check": [
+        { "type": "contains_all", "values": ["network"] },
+        { "type": "regex", "pattern": "(?s)\\b(no|none)\\b.{0,30}privilege|privilege.{0,30}\\b(no|none)\\b" },
+        { "type": "no_fabricated_cve" }
+      ]
+    },
+    {
+      "id": "sec_kerberos_port",
+      "prompt": "A Windows domain service issues tickets that clients present to authenticate to other domain services, instead of sending passwords. Which protocol is this, and on which default port does the domain controller listen for it?",
+      "max_tokens": 300,
+      "check": [
+        { "type": "contains_all", "values": ["kerberos", "88"] },
+        { "type": "no_fabricated_cve" }
+      ]
+    },
+    {
+      "id": "sec_owasp_idor",
+      "prompt": "A web application shows invoices at /invoices?account_id=1234, and a logged-in user can change account_id to another number and see other customers' invoices. Which OWASP Top 10 (2021) category does this flaw fall under? Name the category.",
+      "max_tokens": 300,
+      "check": [
+        { "type": "regex", "pattern": "broken\\s+access\\s+control" },
+        { "type": "no_fabricated_cve" }
+      ]
+    },
+    {
+      "id": "sec_hardening_laps",
+      "prompt": "Attackers are moving laterally between workstations with Pass-the-Hash because every workstation's built-in local Administrator account shares the same password. Which Microsoft solution specifically mitigates this by giving each machine a unique, regularly rotated local administrator password managed in Active Directory or Entra ID? Name it.",
+      "max_tokens": 300,
+      "check": [
+        { "type": "regex", "pattern": "\\bLAPS\\b|local\\s+admin(istrator)?\\s+password\\s+solution" },
+        { "type": "no_fabricated_cve" }
+      ]
+    },
+    {
+      "id": "sec_sigma_rule",
+      "prompt": "What does the following Sigma rule detect, and what attacker goal does it indicate?\n\ntitle: Suspicious Credential Dumping Tool\nlogsource:\n  category: process_creation\n  product: windows\ndetection:\n  selection_img:\n    Image|endswith: '\\mimikatz.exe'\n  selection_cmd:\n    CommandLine|contains:\n      - 'sekurlsa::logonpasswords'\n      - 'lsadump::sam'\n  condition: selection_img or selection_cmd\nlevel: high",
+      "max_tokens": 400,
+      "check": [
+        { "type": "contains_all", "values": ["mimikatz"] },
+        { "type": "regex", "pattern": "credential|lsass|password|hash" },
+        { "type": "no_fabricated_cve" }
+      ]
+    },
+    {
+      "id": "sec_yara_rule",
+      "prompt": "What kind of file does this YARA rule match, and what do the two conditions check?\n\nrule Suspicious_Dropper {\n  strings:\n    $mz = { 4D 5A }\n    $s1 = \"This program cannot be run in DOS mode\"\n    $s2 = \"cmd.exe /c del\" ascii wide\n  condition:\n    $mz at 0 and $s1 and $s2\n}",
+      "max_tokens": 400,
+      "check": [
+        { "type": "regex", "pattern": "\\bPE\\b|portable\\s+executable|windows\\s+executable|\\.exe\\b|MZ\\s+header" },
+        { "type": "contains_all", "values": ["cmd.exe"] },
+        { "type": "no_fabricated_cve" }
+      ]
+    }
+  ]
+}

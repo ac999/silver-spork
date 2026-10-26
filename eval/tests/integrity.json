@@ -1,0 +1,69 @@
+{
+  "suite": "integrity",
+  "kpi": "Output integrity (no loops, template leaks or garbage on long answers)",
+  "applies_to": ["all"],
+  "threshold": ">= 10/10",
+  "prompt_suffix": "\n\nWrite roughly 800-1000 words in English, using headings and paragraphs.",
+  "cases": [
+    {
+      "id": "int_tcp",
+      "prompt": "Explain how TCP establishes a connection with the three-way handshake and how its congestion control (slow start, congestion avoidance, fast retransmit) keeps the network from collapsing.",
+      "max_tokens": 2048,
+      "check": { "type": "integrity" }
+    },
+    {
+      "id": "int_zfs_nas",
+      "prompt": "Write a step-by-step how-to for building a home NAS on Linux with ZFS: choosing disks, creating a mirrored pool, setting compression, snapshots, scheduled scrubs and sharing over SMB.",
+      "max_tokens": 2048,
+      "check": { "type": "integrity" }
+    },
+    {
+      "id": "int_proc_thread",
+      "prompt": "Explain the difference between processes and threads, how memory is shared or isolated in each, and show short illustrative examples in two different programming languages.",
+      "max_tokens": 2048,
+      "check": { "type": "integrity" }
+    },
+    {
+      "id": "int_water_cycle",
+      "prompt": "Describe the water cycle (evaporation, transpiration, condensation, precipitation, infiltration, runoff) and its role in regulating regional climate, for a high-school audience.",
+      "max_tokens": 2048,
+      "check": { "type": "integrity" }
+    },
+    {
+      "id": "int_sourdough",
+      "prompt": "Write a complete beginner's guide to creating a sourdough starter from scratch and baking a first loaf, including a day-by-day schedule and common mistakes.",
+      "max_tokens": 2048,
+      "check": { "type": "integrity" }
+    },
+    {
+      "id": "int_pubkey",
+      "prompt": "Explain public-key cryptography: how RSA and elliptic-curve schemes differ, how key exchange works, what digital signatures prove, and why key sizes differ between the two.",
+      "max_tokens": 2048,
+      "check": { "type": "integrity" }
+    },
+    {
+      "id": "int_cpu_pipeline",
+      "prompt": "Explain how a modern CPU executes instructions: the fetch/decode/execute pipeline, superscalar execution, branch prediction, out-of-order execution and the cache hierarchy.",
+      "max_tokens": 2048,
+      "check": { "type": "integrity" }
+    },
+    {
+      "id": "int_reboot_guide",
+      "prompt": "Write a structured troubleshooting guide for a Windows 11 desktop PC (mid-range CPU, discrete graphics card, 32 GB DDR4, 750 W power supply) that randomly resets with no blue screen and no minidump: what logs to check, which hardware to suspect, and how to isolate the cause step by step.",
+      "max_tokens": 2048,
+      "check": { "type": "integrity" }
+    },
+    {
+      "id": "int_git_objects",
+      "prompt": "Explain the Git object model: blobs, trees, commits and tags, how refs and branches point at commits, what happens during a commit, and how packfiles store objects efficiently.",
+      "max_tokens": 2048,
+      "check": { "type": "integrity" }
+    },
+    {
+      "id": "int_gpu_vs_cpu",
+      "prompt": "Explain how GPUs differ from CPUs architecturally and why GPUs are so much faster at matrix multiplication and neural-network inference, covering SIMT execution, memory bandwidth and tensor cores.",
+      "max_tokens": 2048,
+      "check": { "type": "integrity" }
+    }
+  ]
+}

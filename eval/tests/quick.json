@@ -1,0 +1,194 @@
+{
+  "suite": "quick",
+  "kpi": "Everyday assistant tasks (summaries, rewrites, translation, extraction)",
+  "applies_to": ["everyday"],
+  "threshold": ">= 4.0/5 average judge score; all deterministic checks pass (3/3)",
+  "cases": [
+    {
+      "id": "quick_summary_3_bullets",
+      "prompt": "Summarize the following text in exactly 3 bullet points (one line each, starting with '- '). Output only the three bullets.\n\nIn the spring of 2024 the town council of Valea Lungă voted to replace all 1,840 of its sodium streetlights with LED fixtures over a period of eighteen months. The decision followed a two-year pilot on three streets near the railway station, during which electricity consumption for lighting fell by 61 percent and the number of maintenance call-outs dropped from an average of nine per month to two. The council's finance committee estimated that the full programme would cost 2.3 million lei, of which roughly 40 percent would be covered by a regional energy-efficiency grant, with the remainder financed through a loan repaid from the savings on the electricity bill. At the current tariff the payback period was calculated at just under seven years, although the committee noted that any increase in energy prices would shorten it. Not everyone was enthusiastic. Residents of the old quarter complained that the colder, bluer light of the pilot fixtures made the stone facades look harsh, and an amateur astronomy club warned that poorly shielded LEDs could increase sky glow. In response, the council specified warm-white fixtures with a colour temperature of 2,700 kelvin for the historic centre and full cut-off housings everywhere, and it added a dimming schedule that reduces output by half between one and five in the morning. The contract was awarded in September to a consortium of two local electrical firms, which committed to hiring at least twelve apprentices from the town's vocational school. Installation began on the main boulevard in October, and the council has promised to publish monthly consumption figures on its website so that residents can check whether the projected savings materialise. The first report, covering November, showed consumption on the completed streets down 58 percent compared with the previous year.",
+      "max_tokens": 400,
+      "check": [
+        {
+          "type": "regex_count",
+          "pattern": "^\\s*[-*•]\\s+\\S",
+          "min": 3,
+          "max": 3
+        },
+        {
+          "type": "judge"
+        }
+      ],
+      "rubric": "Score 1-5. 5 = the three bullets cover (a) the decision/scale (1,840 lights, LED, 18 months) and the pilot savings (~61%), (b) cost/financing (2.3M lei, ~40% grant, ~7-year payback), (c) objections and the mitigations (warm-white 2,700 K, shielding, dimming) and/or first results (-58%). Deduct for invented facts, wrong numbers, bullets longer than ~30 words, or missing one of the three themes."
+    },
+    {
+      "id": "quick_formal_rewrite",
+      "prompt": "Rewrite the following message in a formal, professional tone suitable for an email to a manager. Keep all the facts, do not add new ones.\n\n\"hey, so the thing is the server kinda died again last night and nobody noticed till like 9am. we gotta set up some alerts or whatever so this doesn't keep happening. can you look into it this week?\"",
+      "max_tokens": 400,
+      "check": {
+        "type": "judge"
+      },
+      "rubric": "Score 1-5. 5 = formal register throughout (no slang, no 'kinda', 'gotta', 'whatever'), keeps every fact (server outage last night, unnoticed until about 9 am, need for alerting, request to investigate this week), concise (under ~120 words), addressed appropriately. Deduct for added facts, lost facts, or lingering informal wording."
+    },
+    {
+      "id": "quick_ro_to_en",
+      "lang": "ro",
+      "prompt": "Translate the following Romanian paragraph into natural English. Output only the translation.\n\n\"Dimineața devreme, piața din centrul orașului se umple de țărani veniți din satele învecinate cu lăzi de roșii, brânză proaspătă și miere. Până la ora zece, cele mai bune produse s-au vândut deja, iar vânzătorii rămași își coboară prețurile ca să nu se întoarcă acasă cu marfa.\"",
+      "max_tokens": 300,
+      "check": [
+        {
+          "type": "contains_all",
+          "values": [
+            "tomatoes",
+            "honey"
+          ]
+        },
+        {
+          "type": "judge"
+        }
+      ],
+      "rubric": "Score 1-5 against this reference: \"Early in the morning, the market in the town centre fills with villagers from the neighbouring villages carrying crates of tomatoes, fresh cheese and honey. By ten o'clock the best produce has already been sold, and the remaining sellers lower their prices so as not to go home with their goods.\" 5 = complete, accurate meaning (farmers/villagers, crates, tomatoes, fresh cheese, honey, ten o'clock, remaining sellers lower prices, not returning home with the goods), fluent English. Deduct for omissions, mistranslations or awkward phrasing."
+    },
+    {
+      "id": "quick_en_to_ro",
+      "lang": "ro",
+      "prompt": "Translate the following English paragraph into natural Romanian (with diacritics). Output only the translation.\n\n\"The library will be closed next Monday for maintenance work on the heating system. Books due that day can be returned on Tuesday without any late fee. We apologise for the inconvenience and thank you for your understanding.\"",
+      "max_tokens": 300,
+      "check": [
+        {
+          "type": "regex",
+          "pattern": "\\bbibliotec\\w*"
+        },
+        {
+          "type": "judge"
+        }
+      ],
+      "rubric": "Score 1-5 against this reference: \"Biblioteca va fi închisă lunea viitoare pentru lucrări de întreținere la sistemul de încălzire. Cărțile cu termen de returnare în acea zi pot fi returnate marți fără penalizare de întârziere. Ne cerem scuze pentru neplăcerile create și vă mulțumim pentru înțelegere.\" 5 = grammatically correct Romanian with diacritics, all three sentences conveyed (closed next Monday, heating maintenance; books due that day returnable Tuesday without late fee; apology and thanks), natural register. Deduct for missing diacritics, calques, or lost information."
+    },
+    {
+      "id": "quick_explain_child",
+      "prompt": "Explain to a curious 7-year-old how the internet gets a video from a faraway computer to their tablet. Use simple words, one or two short analogies, and no more than 150 words.",
+      "max_tokens": 400,
+      "check": {
+        "type": "judge"
+      },
+      "rubric": "Score 1-5. 5 = age-appropriate vocabulary (no jargon like 'protocol' or 'bandwidth' without explanation), one or two concrete analogies (letters, roads, puzzle pieces), technically not wrong (data split into pieces, travels through wires/air via many computers, reassembled), warm tone, within ~150 words. Deduct for technical inaccuracies, condescension, or exceeding the length."
+    },
+    {
+      "id": "quick_email_landlord",
+      "prompt": "Draft a short, polite email (under 120 words) to my landlord, Mr. Dumitrescu, reporting that the kitchen tap has been dripping constantly for three days, that I have already tried tightening it, and asking him to arrange a plumber this week. Sign it as Andrei. Include a subject line.",
+      "max_tokens": 400,
+      "check": [
+        {
+          "type": "regex",
+          "pattern": "subject\\s*:"
+        },
+        {
+          "type": "contains_all",
+          "values": [
+            "Dumitrescu",
+            "Andrei",
+            "plumber"
+          ]
+        },
+        {
+          "type": "judge"
+        }
+      ],
+      "rubric": "Score 1-5. 5 = has a subject line, polite greeting to Mr. Dumitrescu, states the dripping kitchen tap for three days, mentions the attempted tightening, asks for a plumber this week, signs as Andrei, under 120 words, natural tone. Deduct for missing elements, excessive length, or invented details (address, phone numbers)."
+    },
+    {
+      "id": "quick_extract_dates",
+      "prompt": "List every calendar date mentioned in the text below in ISO format (YYYY-MM-DD), one per line, in the order they appear. Output only the dates.\n\n\"The contract was signed on 14 March 2026, the first delivery arrived on 2 April 2026, and the final payment is due on 30 June 2026. The warranty runs for two years from the delivery date.\"",
+      "max_tokens": 128,
+      "check": [
+        {
+          "type": "contains_all",
+          "values": [
+            "2026-03-14",
+            "2026-04-02",
+            "2026-06-30"
+          ]
+        },
+        {
+          "type": "regex_count",
+          "pattern": "\\d{4}-\\d{2}-\\d{2}",
+          "min": 3,
+          "max": 3
+        }
+      ]
+    },
+    {
+      "id": "quick_sentiment",
+      "prompt": "Classify the sentiment of each review as positive, negative or neutral. Answer with one line per review in the form `<number>: <label>` and nothing else.\n\n1. Absolutely loved it, works perfectly and arrived early.\n2. Broke after two days, a complete waste of money.\n3. It arrived on Tuesday in a brown cardboard box.\n4. Terrible customer service, never ordering from them again.\n5. Exceeded my expectations, highly recommend to anyone.",
+      "max_tokens": 128,
+      "check": [
+        {
+          "type": "regex",
+          "pattern": "^[^\\d\\n]{0,12}1\\W+positive\\b"
+        },
+        {
+          "type": "regex",
+          "pattern": "^[^\\d\\n]{0,12}2\\W+negative\\b"
+        },
+        {
+          "type": "regex",
+          "pattern": "^[^\\d\\n]{0,12}3\\W+neutral\\b"
+        },
+        {
+          "type": "regex",
+          "pattern": "^[^\\d\\n]{0,12}4\\W+negative\\b"
+        },
+        {
+          "type": "regex",
+          "pattern": "^[^\\d\\n]{0,12}5\\W+positive\\b"
+        }
+      ]
+    },
+    {
+      "id": "quick_shopping_list",
+      "prompt": "Turn this note into a shopping list grouped under exactly three headings, Produce, Dairy and Bakery, with one item per line under each heading.\n\n\"On the way home I need to grab tomatoes and a bag of apples, then some milk and a block of cheese, and if the bakery is still open a loaf of bread and two croissants.\"",
+      "max_tokens": 256,
+      "check": [
+        {
+          "type": "contains_all",
+          "values": [
+            "Produce",
+            "Dairy",
+            "Bakery",
+            "tomatoes",
+            "apples",
+            "milk",
+            "cheese",
+            "bread",
+            "croissants"
+          ]
+        },
+        {
+          "type": "judge"
+        }
+      ],
+      "rubric": "Score 1-5. 5 = tomatoes and apples under Produce, milk and cheese under Dairy, bread and croissants under Bakery, quantities preserved (a bag of apples, a loaf, two croissants), no extra items, clean list formatting. Deduct for misfiled items or added commentary."
+    },
+    {
+      "id": "quick_grammar_fix",
+      "prompt": "Correct the grammar and spelling of the following paragraph without changing its meaning or adding information. Output only the corrected paragraph.\n\n\"Me and him goes to the store yesterday and buyed three apple, but the cashier don't gave us no receipt. Their was alot of people waiting, so we leaves quick.\"",
+      "max_tokens": 200,
+      "check": [
+        {
+          "type": "contains_all",
+          "values": [
+            "went",
+            "bought",
+            "apples",
+            "receipt"
+          ]
+        },
+        {
+          "type": "judge"
+        }
+      ],
+      "rubric": "Score 1-5 against this reference: \"He and I went to the store yesterday and bought three apples, but the cashier didn't give us a receipt. There were a lot of people waiting, so we left quickly.\" 5 = every error fixed (subject pronouns, past tense, plural, double negative, their/there, 'a lot', adverb), meaning unchanged, nothing added. Deduct per remaining error or per unnecessary rewording."
+    }
+  ]
+}

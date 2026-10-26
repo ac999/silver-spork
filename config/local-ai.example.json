@@ -1,0 +1,30 @@
+{
+  "_readme": [
+    "Copy this file to config/local-ai.json (gitignored) and fill in YOUR values.",
+    "Every script reads config/local-ai.json; command-line parameters override it.",
+    "Use forward slashes in paths: valid on Windows, and safe inside JSON.",
+    "Run `pwsh -File scripts/detect-hardware.ps1` to get the values marked (detect)."
+  ],
+  "llamacpp_dir": "/path/to/llama.cpp/build/bin",
+  "_llamacpp_dir": "Folder that contains llama-server and llama-bench. Download a release for your GPU backend (CUDA, ROCm, Vulkan, Metal) from https://github.com/ggml-org/llama.cpp/releases.",
+
+  "hf_home": "/path/to/huggingface",
+  "hf_cache": "/path/to/huggingface/hub",
+  "_hf_cache": "Where GGUF files live. `hf download <repo> <file>` stores them here when HF_HUB_CACHE points to it. Put it on your fastest, largest drive; models are 2-20+ GB each.",
+
+  "server_url": "http://127.0.0.1:8080",
+  "server_port": 8080,
+  "_server": "Keep 127.0.0.1 unless you need LAN access (then also set --api-key in the launcher).",
+
+  "models_max": 1,
+  "_models_max": "How many models the router keeps loaded at once. 1 for a single consumer GPU; raise only if two models plus their KV caches fit in VRAM at the same time.",
+
+  "threads": 8,
+  "_threads": "(detect) Number of PHYSICAL CPU cores, not logical threads. Hyper-threading rarely helps token generation and often hurts it.",
+
+  "python_cmd": "python",
+  "_python_cmd": "(detect) Interpreter used by the eval harness and promptfoo: `py` on Windows with the launcher, `python3` on Linux/macOS, or a venv path.",
+
+  "results_dir": "results",
+  "_results_dir": "Where benchmark logs go, relative to the repo root. Gitignored by default: results describe your machine."
+}

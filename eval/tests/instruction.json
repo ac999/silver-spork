@@ -1,0 +1,59 @@
+{
+  "suite": "instruction",
+  "kpi": "Instruction following (strict output-format constraints)",
+  "applies_to": ["all"],
+  "threshold": ">= 5/6",
+  "cases": [
+    {
+      "id": "inst_json_keys",
+      "prompt": "Return a JSON object describing the planet Mars with exactly these four keys and no others: \"name\", \"diameter_km\", \"moons\", \"has_rings\". Output only the JSON object: no prose, no code fence, no comments.",
+      "max_tokens": 256,
+      "check": { "type": "json_schema_keys", "keys": ["name", "diameter_km", "moons", "has_rings"] }
+    },
+    {
+      "id": "inst_50_words",
+      "prompt": "Write a paragraph of exactly 50 words explaining why regular backups matter. Count carefully. Output only the paragraph, with no title and no word count.",
+      "max_tokens": 256,
+      "check": { "type": "exact_word_count", "count": 50, "tolerance": 2 }
+    },
+    {
+      "id": "inst_ro_list7",
+      "lang": "ro",
+      "prompt": "Scrie o listă numerotată cu exact 7 sfaturi practice pentru a economisi energie electrică acasă. Răspunde doar cu lista, în limba română, fiecare sfat pe un rând nou, numerotat de la 1 la 7, fără introducere și fără încheiere.",
+      "max_tokens": 512,
+      "check": [
+        { "type": "regex_count", "pattern": "^\\s*\\d+[.)]\\s", "min": 7, "max": 7 },
+        { "type": "regex", "pattern": "^\\s*7[.)]\\s" },
+        { "type": "regex", "pattern": "\\b(pentru|energi\\w*|electric\\w*|folos\\w*|becuri\\w*|aparat\\w*|lumin\\w*)\\b" }
+      ]
+    },
+    {
+      "id": "inst_single_word",
+      "prompt": "What is the capital city of Australia? Answer with a single word and nothing else: no punctuation, no explanation.",
+      "max_tokens": 32,
+      "check": { "type": "regex", "pattern": "\\A\\W*Canberra\\W*\\Z" }
+    },
+    {
+      "id": "inst_table_3cols",
+      "prompt": "Produce a markdown table with exactly 3 columns, headed Language, Year, Creator, with one row each for Python, Rust and Go (year of first public release and the main creator). Output only the table: no heading, no notes.",
+      "max_tokens": 256,
+      "check": [
+        { "type": "regex", "pattern": "^\\|[^|\\n]+\\|[^|\\n]+\\|[^|\\n]+\\|[ \\t]*$" },
+        { "type": "not_regex", "pattern": "^\\|(?:[^|\\n]*\\|){4,}[ \\t]*$" },
+        { "type": "not_regex", "pattern": "^\\|[^|\\n]*\\|[^|\\n]*\\|[ \\t]*$" },
+        { "type": "regex_count", "pattern": "^\\|.*\\|[ \\t]*$", "min": 5, "max": 5 },
+        { "type": "contains_all", "values": ["Python", "Rust", "Go"] }
+      ]
+    },
+    {
+      "id": "inst_regex_only",
+      "prompt": "Respond with a single regular expression (Python re syntax) that matches a four-digit year from 1900 to 2099 inclusive and nothing else. Output only the regex itself: no explanation, no code fence, no quotes.",
+      "max_tokens": 64,
+      "check": {
+        "type": "regex_matches_samples",
+        "should_match": ["1900", "1999", "2000", "2024", "2099"],
+        "should_not_match": ["1899", "2100", "999", "20245", "abcd", "19x9"]
+      }
+    }
+  ]
+}

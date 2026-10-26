@@ -1,0 +1,167 @@
+{
+  "suite": "muse",
+  "kpi": "Creative writing (no refusals, originality, instruction adherence)",
+  "applies_to": ["creative"],
+  "threshold": ">= 4.0/5 average judge score; 8/8 pass no_refusal",
+  "cases": [
+    {
+      "id": "muse_noir_opening",
+      "prompt": "Write the opening paragraph (120-180 words) of a noir detective story set in a rain-soaked port city in 1952. First person, past tense, the detective has just been handed a case he does not want.",
+      "max_tokens": 500,
+      "check": [
+        {
+          "type": "no_refusal"
+        },
+        {
+          "type": "judge"
+        }
+      ],
+      "rubric": "Score 1-5. 5 = unmistakable noir voice (terse, world-weary, concrete sensory detail), first person past tense, 1952 port-city setting established, the unwanted case is introduced, 120-180 words, no cliche pile-up (at most one 'dame'/'rain like bullets' type phrase). Deduct for breaking tense or person, generic prose, or length violations."
+    },
+    {
+      "id": "muse_limerick_sysadmin",
+      "prompt": "Write a limerick about a sysadmin who deletes the wrong directory on a Friday afternoon. Output only the five lines.",
+      "max_tokens": 200,
+      "check": [
+        {
+          "type": "no_refusal"
+        },
+        {
+          "type": "regex_count",
+          "pattern": "^\\s*\\S.*$",
+          "min": 5,
+          "max": 5
+        },
+        {
+          "type": "judge"
+        }
+      ],
+      "rubric": "Score 1-5. 5 = proper limerick form (AABBA rhyme, lines 1,2,5 longer with three stressed beats, lines 3,4 shorter), the sysadmin, the wrong directory and Friday afternoon all appear, a genuine punchline, no extra text. Deduct for broken rhyme or meter, missing elements, or added commentary."
+    },
+    {
+      "id": "muse_startup_names",
+      "prompt": "Give me exactly 10 startup name ideas for a company selling indoor hydroponic herb-growing kits to apartment dwellers. Numbered list, one name per line, each followed by a dash and a one-sentence rationale. No introduction or conclusion.",
+      "max_tokens": 600,
+      "check": [
+        {
+          "type": "no_refusal"
+        },
+        {
+          "type": "regex_count",
+          "pattern": "^\\s*\\d+[.)]\\s+\\S",
+          "min": 10,
+          "max": 10
+        },
+        {
+          "type": "judge"
+        }
+      ],
+      "rubric": "Score 1-5. 5 = 10 distinct, pronounceable, brandable names relevant to herbs/hydroponics/small spaces, varied styles (compound words, coined words, evocative words), each with a crisp one-sentence rationale, no duplicates or near-duplicates, no filler text. Deduct for generic names ('HerbTech', 'GrowCo'), repetition, or missing rationales."
+    },
+    {
+      "id": "muse_dialogue_constraint",
+      "prompt": "Write a dialogue of 10-14 lines between a lighthouse keeper and a sailor who has just been rescued from a shipwreck. Constraint: neither character may use the word \"sea\" (you may use ocean, water, waves, etc.). Format each line as `Name: speech`. Output only the dialogue.",
+      "max_tokens": 600,
+      "check": [
+        {
+          "type": "no_refusal"
+        },
+        {
+          "type": "not_regex",
+          "pattern": "\\bsea\\b"
+        },
+        {
+          "type": "regex_count",
+          "pattern": "^\\s*[A-Za-z][A-Za-z .'-]{0,30}:\\s*\\S",
+          "min": 10,
+          "max": 14
+        },
+        {
+          "type": "judge"
+        }
+      ],
+      "rubric": "Score 1-5. 5 = two distinct voices, emotional arc (shock/relief/gratitude or tension), subtext rather than exposition, natural rhythm, stays within 10-14 lines in `Name: speech` format, the forbidden word never appears. Deduct for flat characters, stage directions in place of dialogue, or format slips."
+    },
+    {
+      "id": "muse_product_description",
+      "prompt": "Write a product description (80-120 words) for a compact 75% mechanical keyboard with hot-swappable switches, PBT keycaps, tri-mode connectivity (USB-C, Bluetooth, 2.4 GHz) and a 4,000 mAh battery, aimed at programmers who work from cafes. Do not use the words 'elevate', 'unleash' or 'game-changer'.",
+      "max_tokens": 400,
+      "check": [
+        {
+          "type": "no_refusal"
+        },
+        {
+          "type": "not_regex",
+          "pattern": "\\b(elevate|unleash|game-?changer)"
+        },
+        {
+          "type": "contains_all",
+          "values": [
+            "hot-swap",
+            "PBT",
+            "Bluetooth",
+            "4,000"
+          ]
+        },
+        {
+          "type": "judge"
+        }
+      ],
+      "rubric": "Score 1-5. 5 = every listed feature present and translated into a benefit for a cafe-working programmer, concrete and specific (no vague marketing filler), 80-120 words, banned words absent, confident but not breathless tone. Deduct for omitted features, invented specs, or generic copy."
+    },
+    {
+      "id": "muse_children_outline",
+      "prompt": "Outline a children's picture book (ages 4-7) about a shy snail who is afraid of rain. Give a title, a one-sentence premise, and exactly 6 numbered scenes of one or two sentences each, ending with the snail's change of heart.",
+      "max_tokens": 600,
+      "check": [
+        {
+          "type": "no_refusal"
+        },
+        {
+          "type": "regex_count",
+          "pattern": "^\\s*\\d+[.)]\\s+\\S",
+          "min": 6,
+          "max": 6
+        },
+        {
+          "type": "judge"
+        }
+      ],
+      "rubric": "Score 1-5. 5 = charming title, clear premise, six scenes with a recognisable arc (fear, attempt, setback, help/insight, trying again, acceptance), age-appropriate stakes and vocabulary, a satisfying but not preachy ending. Deduct for scenes that do not advance the story, adult themes, or format deviations."
+    },
+    {
+      "id": "muse_persuasive_library",
+      "prompt": "Write one persuasive paragraph (100-150 words) arguing that a small town should build a public library rather than expand its car park. Address the strongest counter-argument in the paragraph.",
+      "max_tokens": 400,
+      "check": [
+        {
+          "type": "no_refusal"
+        },
+        {
+          "type": "judge"
+        }
+      ],
+      "rubric": "Score 1-5. 5 = a clear thesis, two or three concrete benefits (literacy, community space, free internet, services for job-seekers, children), explicitly names and answers the parking counter-argument (convenience, local trade), persuasive but not strident, 100-150 words, single paragraph. Deduct for strawmanning the counter-argument, vagueness, or length violations."
+    },
+    {
+      "id": "muse_brick_uses",
+      "prompt": "Brainstorm exactly 15 unusual uses for a single ordinary house brick. Numbered list, one use per line, each at most 12 words. Avoid the obvious (building, doorstop, paperweight). No introduction or conclusion.",
+      "max_tokens": 500,
+      "check": [
+        {
+          "type": "no_refusal"
+        },
+        {
+          "type": "regex_count",
+          "pattern": "^\\s*\\d+[.)]\\s+\\S",
+          "min": 15,
+          "max": 15
+        },
+        {
+          "type": "judge"
+        }
+      ],
+      "rubric": "Score 1-5. 5 = 15 genuinely varied and surprising ideas (spanning physical properties: mass, heat retention, abrasiveness, shape, colour pigment), none of the three excluded obvious uses, no duplicates, each line within ~12 words. Deduct for repetition, obvious uses, or lines padded with explanation."
+    }
+  ]
+}

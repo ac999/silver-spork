@@ -1,0 +1,77 @@
+{
+  "_comment": "Local instance (gitignored). Schema and field explanations: models.example.json. Server URL comes from config/local-ai.json (server_url), falling back to http://127.0.0.1:8080; add \"base_url\" here only to override it.",
+  "languages": [],
+  "timeout_s": 600,
+  "default_max_tokens": 4096,
+  "default_thinking_allowance": 6144,
+  "models": {
+    "Deep": {
+      "roles": [
+        "reasoning",
+        "coding",
+        "tools",
+        "creative"
+      ],
+      "notes": "Qwen3.5-35B-A3B MoE, thinking on; reasoning arrives in message.reasoning_content. thinking_allowance is added to every case's max_tokens because reasoning tokens count toward it (without it, short-answer cases came back empty with finish_reason=length).",
+      "sampling": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20
+      },
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "thinking_allowance": 6144
+    },
+    "Dev": {
+      "roles": [
+        "coding",
+        "tools",
+        "everyday",
+        "creative"
+      ],
+      "notes": "Qwen3.5-9B, thinking off by default (no chat_template_kwargs sent). Set {\"enable_thinking\": true} here to test with thinking.",
+      "sampling": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20
+      },
+      "chat_template_kwargs": {}
+    },
+    "Quick": {
+      "roles": [
+        "everyday"
+      ],
+      "notes": "gemma-4-26B-A4B-it UD-IQ4_XS MoE (n-cpu-moe 20), thinking off. Sampling from the Gemma 4 model card.",
+      "sampling": {
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "top_k": 64
+      },
+      "chat_template_kwargs": {}
+    },
+    "Muse": {
+      "roles": [
+        "creative"
+      ],
+      "notes": "gemma-4-26B-A4B-it UD-IQ4_XS MoE (same file as Quick), thinking off. Sampling from the Gemma 4 model card.",
+      "sampling": {
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "top_k": 64
+      },
+      "chat_template_kwargs": {}
+    },
+    "Sentinel": {
+      "roles": [
+        "security"
+      ],
+      "notes": "Foundation-Sec-8B-Instruct (Cisco defensive security model)",
+      "sampling": {
+        "temperature": 0.3
+      },
+      "chat_template_kwargs": {}
+    }
+  },
+  "_readme": "Worked example matching examples/8gb-gpu/model.ini. Copy to eval/models.json. Add your language codes to `languages` to enable language-specific cases (e.g. [\"ro\"])."
+}
